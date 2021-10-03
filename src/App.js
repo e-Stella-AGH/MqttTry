@@ -14,7 +14,7 @@ function App() {
     return client
   };
 
-  const url = `ws://broker.emqx.io:8083/mqtt`;
+  const url = `wss://broker.emqx.io:8084/mqtt`;
   const clientId = `mqttjs_ + ${Math.random().toString(16).substr(2, 8)}`
   const options = {
     keepalive: 30,
