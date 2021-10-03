@@ -1,24 +1,46 @@
 import logo from './logo.svg';
 import './App.css';
+import { useState, useEffect } from 'react';
+import { Other } from './Other';
+import mqtt from 'mqtt';
 
 function App() {
+
+  const [client, setClient] = useState(null)
+
+  const mqttConnect = (host, mqttOption) => {
+    const client = mqtt.connect(host, mqttOption);
+    setClient(client)
+    return client
+  };
+
+  const url = `ws://broker.emqx.io:8083/mqtt`;
+  const clientId = `mqttjs_ + ${Math.random().toString(16).substr(2, 8)}`
+  const options = {
+    keepalive: 30,
+    protocolId: 'MQTT',
+    protocolVersion: 4,
+    clean: true,
+    reconnectPeriod: 1000,
+    connectTimeout: 30 * 1000,
+    will: {
+      topic: 'WillMsg',
+      payload: 'Connection Closed abnormally..!',
+      qos: 0,
+      retain: false
+    },
+    rejectUnauthorized: false
+  };
+  options.clientId = clientId;
+  options.username = process.env.REACT_APP_MQTT_USERNAME;
+  options.password = process.env.REACT_APP_MQTT_PASSWORD;
+
+  useEffect(() => {
+    setClient(mqttConnect(url, options))
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Other client={client} />      
   );
 }
 
