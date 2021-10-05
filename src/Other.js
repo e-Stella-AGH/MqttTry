@@ -1,25 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useMqtt } from './useMqtt';
 
 const id = Math.floor(Math.random()*100)
 
-export const Other = ({ client }) => {
+export const Other = ({ channel }) => {
   const [state, setState] = useState()
-
-  console.log("other:", client)
-
-  const { payload, mqttSub, mqttPublish } = useMqtt(client)
+  const [message, setMessage] = useState({})
 
   useEffect(() => {
-    mqttSub({topic: 'tryout/mqtt'})
-  }, [client])
+    channel.subscribe(m => setMessage(m))
+  }, [channel])
 
   const handleChange = (event) => {
     setState(event.target.value)
   }
 
   const send = () => {
-      mqttPublish({ topic: 'tryout/mqtt', payload: JSON.stringify({id, state }) })
+    channel.publish('event', JSON.stringify({id, value: state}), (err) => {
+      err ? console.log('error') : console.log('git')
+    })
   }
 
   return (
@@ -29,7 +27,7 @@ export const Other = ({ client }) => {
             <button onClick={send}>Send</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {JSON.stringify(payload)}           
+            {JSON.stringify(message)}           
         </div>
       </div>
   )
